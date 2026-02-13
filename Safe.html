@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShopSphere | Premium Electronics</title>
+    <!-- Tailwind for rapid, robust responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .product-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .img-container {
+            aspect-ratio: 4 / 3;
+            overflow: hidden;
+        }
+        .btn-active:active {
+            transform: scale(0.95);
+        }
+        .hidden-view {
+            display: none !important;
+        }
+        /* Cart Drawer Animations */
+        #cart-drawer {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .drawer-open {
+            transform: translateX(0) !important;
+        }
+        .drawer-overlay {
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .drawer-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
+</head>
+<body class="text-slate-900 overflow-x-hidden">
+
+    <!-- Cart Drawer Overlay -->
+    <div id="drawer-overlay" class="drawer-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[60] opacity-0" onclick="toggleCartDrawer(false)"></div>
+    
+    <!-- Side Cart Drawer -->
+    <div id="cart-drawer" class="fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl translate-x-full flex flex-col">
+        <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-xl font-extrabold flex items-center gap-2">
+                <span>🛒</span> Your Cart
+            </h3>
+            <button onclick="toggleCartDrawer(false)" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">✕</button>
+        </div>
+        
+        <div id="drawer-items" class="flex-1 overflow-y-auto p-6 space-y-6">
+            <!-- Items injected by JS -->
+            <div class="text-center py-20 text-slate-400">
+                <span class="text-5xl block mb-4">💨</span>
+                Your cart is feeling a bit light.
+            </div>
+        </div>
+        
+        <div class="p-6 bg-slate-50 border-t border-slate-100">
+            <div class="flex justify-between items-center mb-6">
+                <span class="text-slate-500 font-bold uppercase text-xs tracking-widest">Estimated Total</span>
+                <span id="drawer-total" class="text-2xl font-black">$0.00</span>
+            </div>
+            <button onclick="goToCheckout()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-all btn-active">
+                Checkout Now
+            </button>
+        </div>
+    </div>
+
+    <!-- Sticky Navigation -->
+    <header class="glass-nav sticky top-0 z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <nav class="flex items-center justify-between h-16 sm:h-20 gap-4">
+                <a href="#" class="flex items-center gap-2 group" onclick="showView('grid-view')">
+                    <span class="text-2xl sm:text-3xl group-hover:rotate-12 transition-transform">🌐</span>
+                    <span class="font-extrabold text-xl sm:text-2xl tracking-tight text-blue-600">ShopSphere</span>
+                </a>
+
+                <div class="hidden md:flex flex-1 max-w-md relative">
+                    <input type="text" placeholder="Search premium gear..." oninput="handleSearch(this.value)"
+                           class="w-full bg-slate-100 border-none rounded-full py-2 px-5 focus:ring-2 focus:ring-blue-500 transition-all outline-none">
+                </div>
+
+                <div class="flex items-center gap-3 sm:gap-6">
+                    <button class="hidden lg:block text-slate-600 font-medium hover:text-blue-600 transition-colors">Support</button>
+                    <div class="relative cursor-pointer group btn-active p-2" onclick="toggleCartDrawer(true)">
+                        <span class="text-2xl">🛒</span>
+                        <span id="cart-badge" class="absolute top-0 right-0 bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white">0</span>
+                    </div>
+                    <button class="bg-slate-900 text-white px-3 sm:px-5 py-2 rounded-lg text-xs sm:text-sm font-bold hover:bg-slate-800 transition-all">Account</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        
+        <!-- Product Grid View -->
+        <section id="grid-view" class="view-section">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Featured Collection</h2>
+                    <p class="text-slate-500 mt-1">Discover high-end performance gear</p>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-full border border-slate-200 text-sm font-medium text-slate-600 shadow-sm">
+                    <span id="item-count">0</span> Items Found
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8" id="product-container">
+                <!-- Products injected by JS -->
+            </div>
+        </section>
+
+        <!-- Product Detail View -->
+        <section id="detail-view" class="view-section hidden-view animate-in fade-in duration-500">
+            <button class="flex items-center gap-2 text-slate-500 font-bold hover:text-blue-600 mb-6 transition-colors group" onclick="showView('grid-view')">
+                <span class="group-hover:-translate-x-1 transition-transform">←</span> Back to Gallery
+            </button>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 bg-white p-4 sm:p-10 rounded-3xl shadow-xl border border-slate-100">
+                <div class="img-container rounded-2xl bg-slate-50 flex items-center justify-center p-4 sm:p-8">
+                    <img id="detail-img" src="" alt="Product" class="max-h-full w-auto object-contain drop-shadow-2xl">
+                </div>
+                
+                <div class="flex flex-col">
+                    <div class="flex items-center gap-2 text-emerald-600 font-bold text-sm mb-4">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        In Stock & Ready to Ship
+                    </div>
+                    
+                    <h1 id="detail-title" class="text-3xl sm:text-4xl font-extrabold mb-4 leading-tight">Product Name</h1>
+                    
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="flex text-amber-400 text-lg">★★★★★</div>
+                        <span class="text-slate-400 text-sm font-medium">128+ Reviews</span>
+                    </div>
+
+                    <div id="detail-price" class="text-4xl font-black text-slate-900 mb-6 sm:mb-8">$0.00</div>
+                    
+                    <p class="text-slate-600 leading-relaxed mb-8 text-base sm:text-lg">
+                        Our flagship performance model engineered for professionals. Featuring industry-leading battery life, precision haptics, and a premium titanium finish.
+                    </p>
+
+                    <div class="mt-auto space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-500 uppercase mb-3">Quantity</label>
+                            <div class="flex items-center gap-4">
+                                <div class="flex items-center border-2 border-slate-200 rounded-xl overflow-hidden p-1 bg-slate-50 shadow-sm">
+                                    <button onclick="changeQty(-1)" class="w-10 h-10 flex items-center justify-center hover:bg-white font-bold text-xl btn-active text-slate-600">-</button>
+                                    <span id="detail-qty" class="w-12 text-center font-bold text-lg">1</span>
+                                    <button onclick="changeQty(1)" class="w-10 h-10 flex items-center justify-center hover:bg-white font-bold text-xl btn-active text-slate-600">+</button>
+                                </div>
+                                <span class="text-xs text-slate-400 font-medium">Max 5 per order</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <button onclick="addToCart()" class="bg-white border-2 border-slate-900 py-4 rounded-xl font-bold text-slate-900 hover:bg-slate-50 transition-all btn-active">
+                                Add to Cart
+                            </button>
+                            <button onclick="buyNow()" class="bg-blue-600 py-4 rounded-xl font-bold text-white hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all btn-active">
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checkout View -->
+        <section id="checkout-view" class="view-section hidden-view">
+            <div class="flex items-center gap-4 mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Secure Checkout</h2>
+                <div class="h-[1px] flex-1 bg-slate-200"></div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Form Column -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white p-5 sm:p-8 rounded-2xl shadow-sm border border-slate-200">
+                        <form id="payment-form" onsubmit="processPayment(event)" class="space-y-8">
+                            
+                            <!-- Step 1: Contact -->
+                            <div>
+                                <h4 class="text-lg font-bold mb-5 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">1</span>
+                                    Contact & Delivery
+                                </h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Email Address</label>
+                                        <input type="email" placeholder="alex@example.com" required 
+                                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Shipping Address</label>
+                                        <input type="text" placeholder="Street Address, Apartment, Suite" required 
+                                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">City</label>
+                                        <input type="text" placeholder="San Francisco" required 
+                                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Zip Code</label>
+                                        <input type="text" placeholder="94103" required 
+                                               class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all outline-none">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Payment -->
+                            <div class="pt-6 border-t border-slate-100">
+                                <h4 class="text-lg font-bold mb-5 flex items-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm">2</span>
+                                    Payment Method
+                                </h4>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <label id="label-card" class="flex items-center justify-between p-4 border-2 border-blue-500 rounded-xl cursor-pointer bg-blue-50">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xl">💳</span>
+                                            <span class="font-bold">Card</span>
+                                        </div>
+                                        <input type="radio" name="payMethod" value="card" checked onchange="switchPaymentUI('card')" class="accent-blue-600">
+                                    </label>
+                                    <label id="label-upi" class="flex items-center justify-between p-4 border-2 border-slate-100 rounded-xl cursor-pointer hover:bg-slate-50">
+                                        <div class="flex items-center gap-3">
+                                            <span class="text-xl">⚡</span>
+                                            <span class="font-bold">UPI / QR</span>
+                                        </div>
+                                        <input type="radio" name="payMethod" value="upi" onchange="switchPaymentUI('upi')" class="accent-blue-600">
+                                    </label>
+                                </div>
+                                
+                                <!-- Card UI -->
+                                <div id="ui-card" class="space-y-4">
+                                    <input type="text" placeholder="Card Number (0000 0000 0000 0000)" 
+                                           class="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <input type="text" placeholder="MM/YY" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-center">
+                                        <input type="password" placeholder="CVV" class="p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-center">
+                                    </div>
+                                </div>
+
+                                <!-- UPI UI -->
+                                <div id="ui-upi" class="hidden-view space-y-6 text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                                    <div class="mx-auto w-48 h-48 bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center justify-center">
+                                        <!-- Mock QR Code SVG -->
+                                        <svg viewBox="0 0 100 100" class="w-full h-full text-slate-900">
+                                            <path d="M10 10h30v30h-30zM15 15v20h20v-20zM60 10h30v30h-30zM65 15v20h20v-20zM10 60h30v30h-30zM15 65v20h20v-20zM45 45h10v10h-10zM60 60h10v10h-10zM70 70h10v10h-10zM80 80h10v10h-10zM60 80h10v10h-10zM80 60h10v10h-10zM45 10h10v10h-10zM10 45h10v10h-10zM90 45h10v10h-10zM45 90h10v10h-10z" fill="currentColor"/>
+                                            <rect x="20" y="20" width="10" height="10" />
+                                            <rect x="70" y="20" width="10" height="10" />
+                                            <rect x="20" y="70" width="10" height="10" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Scan QR to pay with any UPI App</p>
+                                        <p class="text-xs text-slate-400 mt-1">GPay, PhonePe, Paytm supported</p>
+                                    </div>
+                                    <div class="px-8">
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">@</div>
+                                            <input type="text" placeholder="Enter UPI ID (optional)" class="w-full pl-8 p-3 bg-white border border-slate-200 rounded-lg outline-none text-sm">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="pay-btn" class="w-full bg-slate-900 text-white py-5 rounded-xl font-extrabold text-lg hover:bg-black transition-all shadow-xl btn-active">
+                                Complete Purchase
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Summary Column -->
+                <div class="lg:col-span-1">
+                    <div class="bg-slate-900 text-white p-6 sm:p-8 rounded-3xl lg:sticky lg:top-28 shadow-2xl">
+                        <h4 class="text-xl font-bold mb-6">Order Summary</h4>
+                        <div id="checkout-items" class="mb-6 space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scroll">
+                            <!-- Items Injected -->
+                        </div>
+                        
+                        <div class="space-y-3 pt-6 border-t border-slate-700 text-slate-400 text-sm sm:text-base">
+                            <div class="flex justify-between">
+                                <span>Subtotal</span>
+                                <span id="summ-sub" class="text-white">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Shipping</span>
+                                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest">Free Express</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Taxes</span>
+                                <span id="summ-tax" class="text-white">$0.00</span>
+                            </div>
+                            <div class="flex justify-between pt-4 border-t border-slate-700">
+                                <span class="text-lg font-bold text-white">Total</span>
+                                <span id="summ-total" class="text-2xl font-black text-blue-400">$0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-8 flex items-center justify-center gap-4 opacity-30 grayscale invert">
+                            <span class="text-lg">💳</span>
+                            <span class="text-lg">🛡️</span>
+                            <span class="text-lg">💰</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Success View -->
+        <section id="success-view" class="view-section hidden-view py-12 sm:py-20 px-4">
+            <div class="max-w-md mx-auto text-center bg-white p-8 sm:p-12 rounded-[2.5rem] border border-slate-100 shadow-2xl">
+                <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-5xl mx-auto mb-8 animate-bounce">
+                    ✓
+                </div>
+                <h2 class="text-3xl font-black mb-3">Payment Secured!</h2>
+                <p class="text-slate-500 mb-8 leading-relaxed">Your order is being processed. We'll notify you once it's on its way.</p>
+                
+                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 mb-8">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Transaction ID</p>
+                    <p id="final-id" class="text-xl font-mono font-bold text-blue-600">#SP-492021</p>
+                </div>
+
+                <button onclick="showView('grid-view')" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-black transition-all btn-active">
+                    Return to Shop
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 pt-16 pb-10 mt-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+                <div class="space-y-4">
+                    <div class="font-extrabold text-2xl tracking-tight text-blue-600 flex items-center gap-2">
+                        <span>🌐</span> ShopSphere
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed">The global standard for premium electronics. Fast shipping. Secure payments. Zero compromises.</p>
+                </div>
+                <div>
+                    <h5 class="font-bold text-slate-900 mb-5 uppercase tracking-wider text-xs">Menu</h5>
+                    <ul class="space-y-3 text-slate-500 text-sm">
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Vision Pro</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Smart Living</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Audio</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold text-slate-900 mb-5 uppercase tracking-wider text-xs">Help</h5>
+                    <ul class="space-y-3 text-slate-500 text-sm">
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Tracking</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Returns</a></li>
+                        <li><a href="#" class="hover:text-blue-600 transition-colors">Warranty</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h5 class="font-bold text-slate-900 mb-5 uppercase tracking-wider text-xs">Updates</h5>
+                    <div class="flex gap-2">
+                        <input type="email" placeholder="Join us" class="bg-slate-100 border-none rounded-lg px-4 py-2 w-full text-sm outline-none">
+                        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm">✓</button>
+                    </div>
+                </div>
+            </div>
+            <div class="pt-10 border-t border-slate-100 mt-10 text-center text-slate-400 text-[10px] sm:text-xs">
+                &copy; 2026 ShopSphere Marketplace. Global Secure Checkout Enabled.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed bottom-6 right-6 translate-y-28 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl transition-all duration-500 flex items-center gap-3 z-[100] font-bold pointer-events-none">
+        <span id="toast-icon">📦</span>
+        <span id="toast-msg">Added!</span>
+    </div>
+
+    <script>
+        /**
+         * PASTE YOUR IMAGE PATHS BELOW:
+         * Replace the empty string "" in imagePath with your file path or URL.
+         * Example: imagePath: "assets/headphones.jpg"
+         */
+        const products = [
+            { id: 1, name: "Pro Ultra Wireless Max", price: 349.99, color: "blue-600", tag: "PREMIUM", emoji: "🎧", imagePath: "New folder/71QFjliR-ML._AC_UF1000,1000_QL80_.jpg" },
+            { id: 2, name: "Quantum Smart Watch S3", price: 219.00, color: "slate-600", tag: "NEW", emoji: "⌚", imagePath: "New folder/1-99-android-ios-t800-ultra-smart-watch-1-9-48-mm-display-original-imahycxv4apbzrut.webp" },
+            { id: 3, name: "Lumina 4K OLED Pro 32", price: 599.00, color: "slate-900", tag: "BESTSELLER", emoji: "🖥️", imagePath: "New folder/in-energylabel-product-qa55s95faulxl-550348754.avif" },
+            { id: 4, name: "Neon Mechanical Keyboard", price: 159.00, color: "emerald-600", tag: "GAMING", emoji: "⌨️", imagePath: "New folder/hq720.jpg" }
+        ];
+
+        let cart = [];
+        let selectedProduct = null;
+        let selectedQty = 1;
+
+        function init() {
+            renderGrid();
+            updateCartUI();
+        }
+
+        function renderGrid(list = products) {
+            const container = document.getElementById('product-container');
+            document.getElementById('item-count').innerText = list.length;
+            
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full py-20 text-center text-slate-400">
+                        <span class="text-5xl block mb-4">🔍</span>
+                        No products found matching your search.
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = list.map(p => {
+                // Determine image source: custom path or fallback placeholder
+                const imgUrl = p.imagePath || `https://via.placeholder.com/600x450/${p.color.split('-')[1]}/fff?text=${p.emoji}`;
+                
+                return `
+                    <div class="product-card bg-white rounded-2xl border border-slate-100 overflow-hidden cursor-pointer shadow-sm flex flex-col" onclick="viewProduct(${p.id})">
+                        <div class="relative img-container bg-slate-50">
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[9px] font-black tracking-widest z-10">${p.tag}</span>
+                            <img src="${imgUrl}" alt="${p.name}" class="w-full h-full object-cover">
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-slate-800 text-sm mb-4 line-clamp-1">${p.name}</h3>
+                            <div class="flex items-center justify-between">
+                                <span class="text-lg font-black text-slate-900">$${p.price.toFixed(2)}</span>
+                                <div class="bg-blue-50 text-blue-600 w-8 h-8 rounded-lg flex items-center justify-center font-bold">→</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleSearch(query) {
+            const filtered = products.filter(p => 
+                p.name.toLowerCase().includes(query.toLowerCase()) || 
+                p.tag.toLowerCase().includes(query.toLowerCase())
+            );
+            renderGrid(filtered);
+            showView('grid-view');
+        }
+
+        function viewProduct(id) {
+            selectedProduct = products.find(p => p.id === id);
+            selectedQty = 1;
+            
+            // Set image source for detail view
+            const displayImg = selectedProduct.imagePath || `https://via.placeholder.com/800x600/${selectedProduct.color.split('-')[1]}/fff?text=${selectedProduct.emoji}`;
+            
+            document.getElementById('detail-img').src = displayImg;
+            document.getElementById('detail-title').innerText = selectedProduct.name;
+            document.getElementById('detail-price').innerText = `$${selectedProduct.price.toFixed(2)}`;
+            document.getElementById('detail-qty').innerText = selectedQty;
+            showView('detail-view');
+        }
+
+        function changeQty(amt) {
+            let newVal = selectedQty + amt;
+            if (newVal >= 1 && newVal <= 5) {
+                selectedQty = newVal;
+                document.getElementById('detail-qty').innerText = selectedQty;
+            }
+        }
+
+        function toggleCartDrawer(open) {
+            const drawer = document.getElementById('cart-drawer');
+            const overlay = document.getElementById('drawer-overlay');
+            if(open) {
+                drawer.classList.add('drawer-open');
+                overlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                drawer.classList.remove('drawer-open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function addToCart() {
+            const existing = cart.find(i => i.id === selectedProduct.id);
+            if(existing) {
+                existing.qty = Math.min(5, existing.qty + selectedQty);
+            } else {
+                cart.push({...selectedProduct, qty: selectedQty});
+            }
+            updateCartUI();
+            toggleCartDrawer(true);
+            showToast('🛒', 'Added to cart');
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(i => i.id !== id);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((a, b) => a + b.qty, 0);
+            document.getElementById('cart-badge').innerText = count;
+            
+            const list = document.getElementById('drawer-items');
+            const totalEl = document.getElementById('drawer-total');
+            
+            if(cart.length === 0) {
+                list.innerHTML = `<div class="text-center py-20 text-slate-400"><span class="text-5xl block mb-4">💨</span>Cart is empty</div>`;
+                totalEl.innerText = "$0.00";
+                return;
+            }
+
+            let total = 0;
+            list.innerHTML = cart.map(item => {
+                total += item.price * item.qty;
+                return `
+                    <div class="flex gap-4 group">
+                        <div class="w-16 h-16 bg-slate-50 rounded-xl flex items-center justify-center text-2xl border border-slate-100">${item.emoji}</div>
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-sm leading-tight pr-4">${item.name}</h4>
+                                <button onclick="removeFromCart(${item.id})" class="text-slate-300 hover:text-red-500 transition-colors">✕</button>
+                            </div>
+                            <div class="flex justify-between items-center mt-2">
+                                <span class="text-slate-400 text-xs font-bold">${item.qty} x $${item.price.toFixed(2)}</span>
+                                <span class="font-black text-sm">$${(item.price * item.qty).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            totalEl.innerText = `$${total.toFixed(2)}`;
+        }
+
+        function goToCheckout() {
+            if(cart.length === 0) return;
+            toggleCartDrawer(false);
+            prepareCheckout();
+            showView('checkout-view');
+        }
+
+        function buyNow() {
+            cart = [{...selectedProduct, qty: selectedQty}];
+            updateCartUI();
+            goToCheckout();
+        }
+
+        function switchPaymentUI(method) {
+            const cardUI = document.getElementById('ui-card');
+            const upiUI = document.getElementById('ui-upi');
+            const cardLbl = document.getElementById('label-card');
+            const upiLbl = document.getElementById('label-upi');
+
+            if(method === 'card') {
+                cardUI.classList.remove('hidden-view');
+                upiUI.classList.add('hidden-view');
+                cardLbl.classList.replace('border-slate-100', 'border-blue-500');
+                cardLbl.classList.add('bg-blue-50');
+                upiLbl.classList.replace('border-blue-500', 'border-slate-100');
+                upiLbl.classList.remove('bg-blue-50');
+            } else {
+                cardUI.classList.add('hidden-view');
+                upiUI.classList.remove('hidden-view');
+                upiLbl.classList.replace('border-slate-100', 'border-blue-500');
+                upiLbl.classList.add('bg-blue-50');
+                cardLbl.classList.replace('border-blue-500', 'border-slate-100');
+                cardLbl.classList.remove('bg-blue-50');
+            }
+        }
+
+        function prepareCheckout() {
+            const list = document.getElementById('checkout-items');
+            const sub = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+            const tax = sub * 0.08;
+            const total = sub + tax;
+
+            list.innerHTML = cart.map(i => `
+                <div class="flex items-center gap-3 text-sm">
+                    <span class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-lg">${i.emoji}</span>
+                    <div class="flex-1">
+                        <div class="font-bold line-clamp-1">${i.name}</div>
+                        <div class="text-[10px] text-slate-500 font-bold">${i.qty} units</div>
+                    </div>
+                    <div class="font-bold">$${(i.price * i.qty).toFixed(2)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('summ-sub').innerText = `$${sub.toFixed(2)}`;
+            document.getElementById('summ-tax').innerText = `$${tax.toFixed(2)}`;
+            document.getElementById('summ-total').innerText = `$${total.toFixed(2)}`;
+        }
+
+        function processPayment(e) {
+            e.preventDefault();
+            const btn = document.getElementById('pay-btn');
+            const oldText = btn.innerText;
+            btn.innerHTML = `<span class="animate-pulse">Authorizing Security...</span>`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                const id = `TX-${Math.floor(100000 + Math.random() * 900000)}`;
+                document.getElementById('final-id').innerText = id;
+                cart = [];
+                updateCartUI();
+                showView('success-view');
+                btn.innerText = oldText;
+                btn.disabled = false;
+            }, 2500);
+        }
+
+        function showView(id) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden-view'));
+            document.getElementById(id).classList.remove('hidden-view');
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function showToast(icon, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-icon').innerText = icon;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-28');
+            setTimeout(() => toast.classList.add('translate-y-28'), 3000);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
